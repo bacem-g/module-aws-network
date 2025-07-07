@@ -1,4 +1,4 @@
-provider "hashicorp/aws" {
+provider "aws" {
   region = var.aws_region
 }
 
@@ -14,8 +14,8 @@ resource "aws_vpc" "main" {
   enable_dns_hostnames = true
 
   tags = {
-    "Name"                                        = local.vpc_name,
-    "kubernetes.io/cluster/${local.cluster_name}" = "shared",
+    Name                                          = local.vpc_name
+    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
   }
 }
 
@@ -29,7 +29,7 @@ resource "aws_subnet" "public-subnet-a" {
   availability_zone = data.aws_availability_zones.available.names[0]
 
   tags = {
-    "Name"                                        = "${local.vpc_name}-public-subnet-a"
+    Name                                          = "${local.vpc_name}-public-subnet-a"
     "kubernetes.io/cluster/${local.cluster_name}" = "shared"
     "kubernetes.io/role/elb"                      = "1"
   }
@@ -41,7 +41,7 @@ resource "aws_subnet" "public-subnet-b" {
   availability_zone = data.aws_availability_zones.available.names[1]
 
   tags = {
-    "Name"                                        = "${local.vpc_name}-public-subnet-b"
+    Name                                          = "${local.vpc_name}-public-subnet-b"
     "kubernetes.io/cluster/${local.cluster_name}" = "shared"
     "kubernetes.io/role/elb"                      = "1"
   }
@@ -53,7 +53,7 @@ resource "aws_subnet" "private-subnet-a" {
   availability_zone = data.aws_availability_zones.available.names[0]
 
   tags = {
-    "Name"                                        = "${local.vpc_name}-private-subnet-a"
+    Name                                          = "${local.vpc_name}-private-subnet-a"
     "kubernetes.io/cluster/${local.cluster_name}" = "shared"
     "kubernetes.io/role/internal-elb"             = "1"
   }
@@ -65,7 +65,7 @@ resource "aws_subnet" "private-subnet-b" {
   availability_zone = data.aws_availability_zones.available.names[1]
 
   tags = {
-    "Name"                                        = "${local.vpc_name}-private-subnet-b"
+    Name                                          = "${local.vpc_name}-private-subnet-b"
     "kubernetes.io/cluster/${local.cluster_name}" = "shared"
     "kubernetes.io/role/internal-elb"             = "1"
   }
@@ -88,7 +88,7 @@ resource "aws_route_table" "public-route" {
   }
 
   tags = {
-    "Name" = "${local.vpc_name}-public-route"
+    Name = "${local.vpc_name}-public-route"
   }
 }
 
@@ -104,13 +104,13 @@ resource "aws_route_table_association" "public-b-association" {
 
 resource "aws_eip" "nat-a" {
   tags = {
-    "Name" = "${local.vpc_name}-NAT-a"
+    Name = "${local.vpc_name}-NAT-a"
   }
 }
 
 resource "aws_eip" "nat-b" {
   tags = {
-    "Name" = "${local.vpc_name}-NAT-b"
+    Name = "${local.vpc_name}-NAT-b"
   }
 }
 
@@ -120,7 +120,7 @@ resource "aws_nat_gateway" "nat-gw-a" {
   depends_on    = [aws_internet_gateway.igw]
 
   tags = {
-    "Name" = "${local.vpc_name}-NAT-gw-a"
+    Name = "${local.vpc_name}-NAT-gw-a"
   }
 }
 
@@ -130,7 +130,7 @@ resource "aws_nat_gateway" "nat-gw-b" {
   depends_on    = [aws_internet_gateway.igw]
 
   tags = {
-    "Name" = "${local.vpc_name}-NAT-gw-b"
+    Name = "${local.vpc_name}-NAT-gw-b"
   }
 }
 
@@ -143,7 +143,7 @@ resource "aws_route_table" "private-route-a" {
   }
 
   tags = {
-    "Name" = "${local.vpc_name}-private-route-a"
+    Name = "${local.vpc_name}-private-route-a"
   }
 }
 
@@ -156,7 +156,7 @@ resource "aws_route_table" "private-route-b" {
   }
 
   tags = {
-    "Name" = "${local.vpc_name}-private-route-b"
+    Name = "${local.vpc_name}-private-route-b"
   }
 }
 
@@ -170,12 +170,8 @@ resource "aws_route_table_association" "private-b-association" {
   route_table_id = aws_route_table.private-route-b.id
 }
 
-# Create a Route 53 zone for DNS support inside the VPC
 resource "aws_route53_zone" "private-zone" {
-  # AWS requires a lowercase name. 
-  #name = "lower(${var.env_name}.${var.vpc_name}.com)"
-  name = "${var.env_name}.${var.vpc_name}.com"
-  #name = "testing.com"
+  name          = "${var.env_name}.${var.vpc_name}.com"
   force_destroy = true
 
   vpc {
